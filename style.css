@@ -6,6 +6,14 @@ body {
   color: #222;
 }
 
+/* Pinterest style masonry layout */
+.gallery {
+  columns: 3;
+  column-gap: 30px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 .container {
   opacity: 0;
   max-width: 1400px;
@@ -15,12 +23,12 @@ body {
 
 #sketch {
   position: fixed;
-  z-index: -1;
+  z-index: 1;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  /* display: none; */
+  pointer-events: none;
 } 
 
 ul {
@@ -46,87 +54,112 @@ a {
   padding-left: 3rem;
   padding-right: 3rem;
   padding-bottom: 4rem;
+  overflow: hidden;
+}
+
+@media screen and (max-width: 768px) {
+  .gallery-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
 }
 
 .gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: auto;
-  gap: 70px 50px;
   margin-top: 20px;
-  grid-auto-flow: dense; /* This helps fill empty spaces */
-  align-items: start; /* Ensures items align at the top */
 }
 
 @media screen and (max-width: 950px) {
   .gallery {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px 20px;
+    columns: 2;
+    column-gap: 25px;
   }
 }
 
 @media screen and (max-width: 750px) {
   .gallery {
-    grid-template-columns: 1fr;
-    gap: 50px;
+    columns: 1;
+    column-gap: 0;
   }
 }
 
 .gallery .gallery-item {
   position: relative;
-  transition: transform 0.3s ease;
-  display: flex;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: inline-block;
   flex-direction: column;
+  background-color: transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+  width: 100%;
+  break-inside: avoid;
 }
 
 .gallery .gallery-item:hover {
   transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
-.gallery .gallery-item:before {
-  content: "";
-  display: block;
-  padding-top: 0; /* This helps maintain consistent heights */
+/* Style for when WebGL effect is active */
+.gallery .gallery-item.effect-active {
+  z-index: 0;
+}
+
+/* Let original image fade gracefully */
+.gallery .gallery-item.effect-active .gallery-item-img {
+  opacity: 1;
 }
 
 .gallery .gallery-item.featured {
-  grid-column: span 2;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
 .gallery .gallery-item.featured .gallery-item-img {
-  max-height: 350px;
   height: auto;
   object-position: center;
+  border-radius: 8px;
+}
+
+@media screen and (min-width: 751px) {
+  .gallery .gallery-item.featured {
+    /* Only make featured items larger on non-mobile */
+    transform: scale(1.02);
+    z-index: 1;
+  }
 }
 
 @media screen and (max-width: 750px) {
   .gallery .gallery-item.featured {
     grid-column: span 1;
   }
-  
-  .gallery .gallery-item.featured .gallery-item-img {
-    max-height: 250px;
-  }
 }
 
 .gallery .gallery-item .gallery-item-img {
   width: 100%;
   height: auto;
-  max-height: 250px;
   display: block;
-  opacity: 0;        /* Will be changed to 1 via JavaScript */
+  opacity: 0;        /* Start with 0, will be changed via JavaScript */
   cursor: pointer;
-  transition: all 0.5s ease;
-  object-fit: contain; /* Changed to contain to prevent any stretching */
-  border-radius: 4px;
-  background-color: #f0f0f0;
+  transition: opacity 0.3s ease;
+  object-fit: cover;
+  border-radius: 8px;
+  background-color: transparent;
+  max-width: 100%;
+}
+
+/* Hide the text elements and categories */
+.gallery .gallery-item .gallery-item-text,
+.gallery .gallery-item .categories {
+  display: none;
 }
 
 .gallery .gallery-item .gallery-item-text {
-  margin-top: 0.75rem;
+  padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  background-color: #fff;
 }
 
 .gallery .gallery-item .gallery-item-text .text-1 {
@@ -137,17 +170,20 @@ a {
 .gallery .gallery-item .gallery-item-text .text-2 {
   font-size: 1rem;
   font-weight: 600;
+  margin-top: 2px;
 }
 
 .gallery .gallery-item .categories {
   font-size: 0.75rem;
   opacity: 0;
-  margin-top: 0.5rem;
+  margin-top: 0;
+  padding: 0 1.25rem 1rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   color: #666;
   word-spacing: 0.5rem;
+  background-color: #fff;
 }
 
 .slide-in-text-wrapper {

@@ -32,7 +32,12 @@ vec3 distort(vec3 p){
     float d=distance(uv1,uv2);
     float offset=sin(d*10.)*.1;
     offset=gaussian(d*3.,.6);
-    p*=(1.+offset*.6*uHoverState);
+    
+    // Smoother distortion effect that extends to edges
+    float effectStrength = 0.65; // Increased from 0.6
+    p*=(1.+offset*effectStrength*uHoverState);
+    
+    // Pass offset to fragment shader for edge effects
     vOffset=offset;
     return p;
 }
@@ -52,6 +57,7 @@ varying vec2 vUv;
 uniform sampler2D iChannel0;
 
 uniform float uClipProgress;
+uniform float uHoverState;
 
 varying float vOffset;
 
@@ -59,8 +65,14 @@ void main(){
     vec2 uv=vUv;
     vec4 tex=texture(iChannel0,uv);
     vec4 col=tex;
-    // col=vec4(vOffset,0.,0.,1.);
+    
+    // Add a slight effect to edges during hover
+    float edgeEffect = smoothstep(0.0, 0.15, vOffset) * uHoverState;
+    col.rgb += edgeEffect * 0.05; // Subtle brightness boost on edges
+    
+    // Original animation for intro
     col=mix(col,vec4(0.),step(uClipProgress,uv.y));
+    
     gl_FragColor=col;
 }
 `;
@@ -136,17 +148,27 @@ makuGroup.addMultiple(makus);
 makuGroup.syncPositions();
 
 makuGroup.makus.forEach((maku) => {
-  maku.el.addEventListener("mouseenter", () => {
+  // Get the gallery item (parent of the image)
+  const galleryItem = maku.el.closest('.gallery-item');
+  
+  galleryItem.addEventListener("mouseenter", () => {
+    // Add active class to the gallery item
+    galleryItem.classList.add('effect-active');
+    
     gsap.to(maku.mesh.material.uniforms.uHoverState, {
       value: 1,
       duration: 0.75
     });
   });
 
-  maku.el.addEventListener("mouseleave", () => {
+  galleryItem.addEventListener("mouseleave", () => {
+    // Start the transition out
     gsap.to(maku.mesh.material.uniforms.uHoverState, {
       value: 0,
-      duration: 0.75
+      duration: 0.75,
+      onComplete: () => {
+        galleryItem.classList.remove('effect-active');
+      }
     });
   });
 });
@@ -279,5 +301,25 @@ const introAnime = () => {
         stagger: 0.02
       },
       "-=0.8"
-    );
+    )
+    .call(showImages);
 };
+
+// Make images visible when loaded
+function showImages() {
+  const images = document.querySelectorAll('.gallery-item-img');
+  images.forEach(img => {
+    if (img.complete) {
+      img.style.opacity = '1';
+    } else {
+      img.addEventListener('load', () => {
+        img.style.opacity = '1';
+      });
+    }
+  });
+}
+
+window.addEventListener("load", showImages);
+window.addEventListener("resize", () => {
+  // Only needed for responsive adjustments
+});
