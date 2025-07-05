@@ -195,7 +195,7 @@ window.addEventListener("mousemove", () => {
 
 async function onLoaded() {
   document.querySelector("body").style.overflow = "visible";
-  document.querySelector(".loader-screen").classList.add("hollow");
+  // We've removed the loader screen, so skip that part
   document.querySelector(".container").style.opacity = "1";
   await sleep(500);
   introAnime();
@@ -305,23 +305,48 @@ const introAnime = () => {
     .call(showImages);
 };
 
-// Make images visible when loaded
+// Animate images to become visible with staggered effect
 function showImages() {
+  // Make container visible
+  const container = document.querySelector(".container");
+  if (container) {
+    container.style.opacity = "1";
+  }
+  
+  // Animate all images with a staggered effect
   const images = document.querySelectorAll('.gallery-item-img');
-  images.forEach(img => {
-    // Set proper height based on image aspect ratio
-    img.onload = function() {
-      // Make the image visible once loaded
+  images.forEach((img, index) => {
+    // Add slight delay for each image to create staggered effect
+    setTimeout(() => {
       img.style.opacity = '1';
-    };
+    }, 100 + (index * 50));
     
-    // If already loaded, make it visible immediately
-    if (img.complete) {
-      img.style.opacity = '1';
-    }
+    // Add onload handler as backup
+    img.onload = function() {
+      if (this.style.opacity !== '1') {
+        this.style.opacity = '1';
+      }
+    };
   });
 }
 
+// Fallback to ensure content becomes visible even if animations fail
+setTimeout(() => {
+  const container = document.querySelector(".container");
+  const images = document.querySelectorAll('.gallery-item-img');
+  
+  if (container && window.getComputedStyle(container).opacity === "0") {
+    container.style.opacity = "1";
+  }
+  
+  images.forEach(img => {
+    if (window.getComputedStyle(img).opacity === "0") {
+      img.style.opacity = "1";
+    }
+  });
+}, 2000); // Wait 2 seconds before forcing visibility
+
+// Only call on window load to allow for animations
 window.addEventListener("load", showImages);
 window.addEventListener("resize", () => {
   // Only needed for responsive adjustments
