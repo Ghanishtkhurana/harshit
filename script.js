@@ -309,17 +309,17 @@ const introAnime = () => {
 function showImages() {
   const images = document.querySelectorAll('.gallery-item-img');
   images.forEach(img => {
+    // Set proper height based on image aspect ratio
+    img.onload = function() {
+      // Make the image visible once loaded
+      img.style.opacity = '1';
+    };
+    
+    // If already loaded, make it visible immediately
     if (img.complete) {
       img.style.opacity = '1';
-    } else {
-      img.addEventListener('load', () => {
-        img.style.opacity = '1';
-      });
     }
   });
-  
-  // Force a reflow to make sure the grid layout adjusts properly
-  document.querySelector('.gallery').style.display = 'grid';
 }
 
 window.addEventListener("load", showImages);

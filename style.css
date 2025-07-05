@@ -6,14 +6,21 @@ body {
   color: #222;
 }
 
-/* Modified masonry layout that flows horizontally */
+/* True Pinterest-style masonry layout */
 .gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-flow: row dense;
-  gap: 30px;
+  columns: 3;
+  column-gap: 15px; /* Gap between columns only */
   max-width: 100%;
   margin: 0 auto;
+  column-fill: balance;
+}
+
+/* Control spacing between items */
+.gallery li {
+  line-height: 0;
+  padding: 0;
+  display: block;
+  break-inside: avoid; /* Prevent items from breaking across columns */
 }
 
 .container {
@@ -66,38 +73,44 @@ a {
   }
 }
 
-.gallery {
-  margin-top: 20px;
-}
+/* Gallery top margin already defined in main gallery rule */
 
 @media screen and (max-width: 950px) {
   .gallery {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
+    columns: 2;
+    column-gap: 15px;
   }
 }
 
 @media screen and (max-width: 750px) {
   .gallery {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    columns: 1;
+    column-gap: 0;
+  }
+  
+  .gallery .gallery-item {
+    margin-bottom: 15px;
   }
 }
 
 .gallery .gallery-item {
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
   background-color: transparent;
-  border-radius: 8px;
+  border-radius: 0; /* Remove border radius for seamless flow */
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: none; /* Remove box shadow for seamless flow */
+  break-inside: avoid;
+  margin: 0 0 15px 0; /* Bottom margin only for spacing between items */
+  padding: 0;
+  display: inline-block; /* This is important for proper column flow */
   width: 100%;
-  height: 100%;
+  box-sizing: border-box;
 }
 
 .gallery .gallery-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  /* Subtle hover effect that doesn't disrupt the flow */
+  filter: brightness(1.05);
 }
 
 /* Style for when WebGL effect is active */
@@ -111,45 +124,33 @@ a {
 }
 
 .gallery .gallery-item.featured {
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-  grid-column: span 2;
+  z-index: 1;
 }
 
 .gallery .gallery-item.featured .gallery-item-img {
-  height: 350px;
+  /* Let featured images maintain their natural proportions */
   object-position: center;
-  border-radius: 8px;
-}
-
-@media screen and (min-width: 751px) {
-  .gallery .gallery-item.featured {
-    /* Only make featured items larger on non-mobile */
-    transform: scale(1.02);
-    z-index: 1;
-  }
 }
 
 @media screen and (max-width: 750px) {
-  .gallery .gallery-item.featured {
-    grid-column: span 1;
-  }
-  
   .gallery .gallery-item .gallery-item-img,
   .gallery .gallery-item.featured .gallery-item-img {
-    height: 250px;
+    height: auto; /* Allow images to maintain their natural proportions */
   }
 }
 
 .gallery .gallery-item .gallery-item-img {
-  width: 100%;
-  height: 300px;
   display: block;
+  width: 100%;
+  height: auto; /* Allow height to be determined by aspect ratio */
+  margin: 0;
+  padding: 0;
   opacity: 0;        /* Start with 0, will be changed via JavaScript */
   cursor: pointer;
   transition: opacity 0.3s ease;
   object-fit: cover;
-  border-radius: 8px;
   background-color: transparent;
+  border-radius: 0; /* Remove border radius for seamless look */
 }
 
 /* Hide the text elements and categories */
@@ -308,3 +309,12 @@ a {
     filter: blur(2px);
   }
 }
+
+/* Pinterest look with subtle spacing - margin-bottom now controls vertical spacing */
+
+/* Reset font size for text elements */
+.top-bar, .top-bar-text, .top-bar-nav {
+  font-size: 1rem;
+}
+
+/* Fix the margin issue by removing the duplicate styles */
