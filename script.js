@@ -317,6 +317,9 @@ function showImages() {
       });
     }
   });
+  
+  // Force a reflow to make sure the grid layout adjusts properly
+  document.querySelector('.gallery').style.display = 'grid';
 }
 
 window.addEventListener("load", showImages);
